@@ -46,13 +46,18 @@ public class Main extends Application {
     }
 
     Ant moveAnt (Ant ant) {
+        try {
+            Thread.sleep(1);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         ant.x += randomStep();
         ant.y += randomStep();
         return ant;
     }
 
     void moveAnts() {
-        ants = ants.stream()
+        ants = ants.parallelStream()
                 .map(this::moveAnt)
                 .collect(Collectors.toCollection(ArrayList::new));
     }
