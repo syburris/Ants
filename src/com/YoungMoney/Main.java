@@ -59,6 +59,7 @@ public class Main extends Application {
     void moveAnts() {
         ants = ants.parallelStream()
                 .map(this::moveAnt)
+                .map(this::aggravateAnt)
                 .collect(Collectors.toCollection(ArrayList::new));
     }
 
@@ -68,6 +69,30 @@ public class Main extends Application {
         double diff = currentTimeStamp - lastTimeStamp;
         diff = diff / 1000000000;
         return (int) (1 / diff);
+    }
+
+    Ant aggravateAnt(Ant ant) {
+        try {
+            Thread.sleep(1);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        ArrayList<Ant> list =
+                ants.parallelStream()
+                .filter(nearAnt -> {
+                    return (Math.abs(ant.x - nearAnt.x) < 10) &&
+                            (Math.abs(ant.y - nearAnt.y) <10);
+                })
+                .collect(Collectors.toCollection(ArrayList::new));
+        ant.color = (list.size() != 1) ? Color.RED : Color.BLACK;
+        return ant;
+    }
+
+    void updateAnts() {
+        ants = ants.parallelStream()
+                .map(this::moveAnt)
+                .map(this::aggravateAnt)
+                .collect(Collectors.toCollection(ArrayList<Ant>::new));
     }
 
     @Override
@@ -86,7 +111,7 @@ public class Main extends Application {
         AnimationTimer timer = new AnimationTimer() {
             @Override
             public void handle(long now) {
-                moveAnts();
+                updateAnts();
                 drawAnts(context);
                 fpsLabel.setText(fps(now) + "");
                 lastTimeStamp = now;
